@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NFL Edge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NFL Edge">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --bg:#0b0f14; --panel:#121923; --panel2:#18212d; --line:#243041; --text:#e8eef6; --mute:#8b9bb0; --green:#2ee6a6; --red:#ff6b6b; --amber:#ffc857; --blue:#5aa9ff; --purple:#c49bff; --radius:14px; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Segoe UI, Roboto, sans-serif; -webkit-text-size-adjust:100%; }
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  header { position: sticky; top:0; z-index:5; background:rgba(11,15,20,.92); backdrop-filter: blur(10px); padding: calc(10px + env(safe-area-inset-top)) 14px 8px; border-bottom:1px solid var(--line); }
+  h1 { font-size:20px; margin:0 0 6px; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+  h1 .dot { width:10px; height:10px; border-radius:50%; background:var(--green); box-shadow:0 0 12px var(--green); display:inline-block; }
+  h1 small { color:var(--mute); font-weight:500; font-size:12px; margin-left:auto; }
+  #status { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:11px; color:var(--mute); background:var(--panel); border:1px solid var(--line); padding:3px 8px; border-radius:999px; white-space:nowrap; }
+  .chip.ok { color:var(--green); border-color:rgba(46,230,166,.35); }
+  .chip.bad { color:var(--red); border-color:rgba(255,107,107,.4); }
+  nav.tabs { display:flex; gap:4px; margin-top:8px; }
+  .tab { flex:1; background:transparent; color:var(--mute); border:1px solid var(--line); border-radius:10px; padding:8px 0; font-size:13px; font-weight:600; }
+  .tab.active { background:var(--panel2); color:var(--text); border-color:#2f3f55; }
+  main { padding: 12px 14px; }
+  .pane { display:none; } .pane.active { display:block; }
+  .filters { display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .filt { background:var(--panel); border:1px solid var(--line); color:var(--mute); border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .filt.active { color:var(--text); border-color:#3a4c66; background:var(--panel2); }
+  .card, .game { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:12px 12px 10px; margin-bottom:10px; border-left-width:4px; }
+  .card.k-ml { border-left-color:var(--blue); } .card.k-sp { border-left-color:var(--purple); } .card.k-tot { border-left-color:var(--amber); }
+  .card.k-prop { border-left-color:var(--green); } .card.k-arb { border-left-color:#ff8ad8; } .card.k-cons { border-left-color:#8bd3ff; }
+  .row1 { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .kind { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--mute); }
+  .edge { font-weight:800; color:var(--green); font-variant-numeric: tabular-nums; }
+  .title { font-weight:700; font-size:16px; }
+  .meta { color:var(--mute); font-size:12px; margin:2px 0 6px; }
+  .buy { font-size:14px; margin-bottom:4px; }
+  .why { color:var(--mute); font-size:12.5px; }
+  .foot { display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px; color:var(--mute); gap:10px; }
+  .foot a { color:var(--blue); text-decoration:none; font-weight:600; }
+  .empty { color:var(--mute); background:var(--panel); border:1px dashed var(--line); border-radius:var(--radius); padding:16px; font-size:14px; }
+  .game .ghead { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+  .game .book { text-align:right; font-size:12px; color:var(--mute); }
+  .game table { width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; font-variant-numeric: tabular-nums; }
+  .game th { text-align:left; color:var(--mute); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; padding:4px 0; }
+  .game td { padding:5px 0; border-top:1px solid var(--line); }
+  .game td:nth-child(n+2), .game th:nth-child(n+2) { text-align:right; }
+  td.pos { color:var(--green); font-weight:700; } td.neg { color:var(--red); }
+  .warn { font-size:12px; color:var(--amber); margin-top:6px; }
+  .mus { font-size:12px; color:var(--mute); margin-top:6px; }
+  code { font-size:11px; background:var(--panel2); padding:1px 4px; border-radius:4px; }
+  .settings label { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .settings input[type=number] { width:84px; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:15px; text-align:right; }
+  .settings input[type=checkbox] { width:20px; height:20px; }
+  .settings .group { margin:14px 0 6px; font-size:12px; color:var(--mute); text-transform:uppercase; letter-spacing:.6px; font-weight:700; }
+  .settings p { color:var(--mute); font-size:12.5px; }
+  .scanbar { position:fixed; left:0; right:0; bottom:0; padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); background:linear-gradient(180deg, rgba(11,15,20,0) 0%, rgba(11,15,20,.95) 30%); }
+  #scanBtn { width:100%; padding:15px; border:0; border-radius:14px; background:var(--green); color:#04140d; font-size:17px; font-weight:800; box-shadow:0 8px 24px rgba(46,230,166,.25); }
+  #scanBtn:disabled { opacity:.6; }
+  .disc { font-size:11px; color:var(--mute); margin-top:14px; }
+  button { font-family: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="dot"></span>NFL Edge <small>Polymarket vs. the books</small></h1>
+  <div id="status"></div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="edges">Edges</button>
+    <button class="tab" data-tab="games">Games</button>
+    <button class="tab" data-tab="props">Props</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </nav>
+</header>
+<main>
+  <section id="pane-edges" class="pane active">
+    <div class="filters">
+      <button class="filt active" data-f="all">All</button>
+      <button class="filt" data-f="lines">Game lines</button>
+      <button class="filt" data-f="props">Props</button>
+      <button class="filt" data-f="struct">Arb / consistency</button>
+    </div>
+    <div id="edges"></div>
+    <p class="disc">Prices shown are live asks (what you'd pay). "Fair" = DraftKings line de-vigged (via ESPN) or Polymarket's own rules/structure. Edge is after Polymarket's taker fee. Not betting advice — verify the order book before you buy; thin books fill at worse prices.</p>
+  </section>
+  <section id="pane-games" class="pane"><div id="games"></div></section>
+  <section id="pane-props" class="pane"><div id="props"></div></section>
+  <section id="pane-settings" class="pane settings">
+    <div class="group">Scope</div>
+    <label><span>This week's games</span><input type="radio" name="scope" value="week"></label>
+    <label><span>Today only</span><input type="radio" name="scope" value="today"></label>
+    <label><span>Include finished games</span><input type="checkbox" id="includeFinal"></label>
+    <div class="group">Minimum edge to flag (points after fee)</div>
+    <label><span>Moneyline</span><input type="number" id="minEdgeML" step="0.5" min="0"></label>
+    <label><span>Spread</span><input type="number" id="minEdgeSpread" step="0.5" min="0"></label>
+    <label><span>Total</span><input type="number" id="minEdgeTotal" step="0.5" min="0"></label>
+    <label><span>Player prop (ruled-out "No")</span><input type="number" id="minEdgeProp" step="0.5" min="0"></label>
+    <label><span>ML vs spread disagreement (pts of line)</span><input type="number" id="consistencyPts" step="0.5" min="0"></label>
+    <label><span>Min market liquidity ($)</span><input type="number" id="minLiquidity" step="100" min="0"></label>
+    <div class="group">Data</div>
+    <label><span>Use CORS relays if direct fetch is blocked</span><input type="checkbox" id="useRelays"></label>
+    <label><span>Show full spread/total ladders on Games tab</span><input type="checkbox" id="showAll"></label>
+    <p>Sources: Polymarket Gamma API (game + player-prop events, best bid/ask), ESPN scoreboard (DraftKings spread/ML/total with juice) and ESPN injury report. Spread and total fair values come from a key-number-aware NFL margin model fitted to the book's line and moneyline; moneyline fair values are the de-vigged book price. Ruled-out players rely on Polymarket's rule that an inactive player's market resolves "No"/"Under".</p>
+    <button id="rescanAfter" class="filt">Save & rescan</button>
+  </section>
+</main>
+<div class="scanbar"><button id="scanBtn">Scan now</button></div>
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
